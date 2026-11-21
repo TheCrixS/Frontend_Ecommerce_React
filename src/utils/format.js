@@ -1,4 +1,8 @@
-const API_ORIGIN = new URL(import.meta.env.VITE_API_URL || "http://localhost:8000").origin;
+// En producción VITE_API_URL es relativa (/api/v1) y la API vive en el mismo dominio
+const API_ORIGIN = new URL(
+  import.meta.env.VITE_API_URL || "http://localhost:8000",
+  window.location.origin
+).origin;
 
 // Pesos colombianos sin decimales: $ 45.000
 const copFormatter = new Intl.NumberFormat("es-CO", {

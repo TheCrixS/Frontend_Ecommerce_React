@@ -1,0 +1,22 @@
+# Etapa 1: compila la app de React a archivos estáticos
+FROM node:22-alpine AS build
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+# La API se sirve en el mismo dominio bajo /api, así que la URL es relativa
+ARG VITE_API_URL=/api/v1
+ENV VITE_API_URL=$VITE_API_URL
+RUN npm run build
+
+# Etapa 2: Caddy sirve los estáticos, hace de proxy hacia la API y gestiona HTTPS
+FROM caddy:2-alpine
+
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/dist /srv
+
+EXPOSE 80 443

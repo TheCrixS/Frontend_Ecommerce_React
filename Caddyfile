@@ -1,0 +1,37 @@
+# SITE_ADDRESS sale del .env de producción:
+#   ":80"              -> solo HTTP, acceso por la IP pública
+#   "tienda.midominio.com" -> HTTPS automático con Let's Encrypt (puertos 80 y 443 abiertos)
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	# Límite de tamaño también en el borde (la API además valida 5 MB por imagen)
+	request_body {
+		max_size 6MB
+	}
+
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# API y portadas subidas -> backend (no tiene puerto publicado)
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+	handle /uploads/* {
+		reverse_proxy backend:8000
+	}
+
+	# App de React: cualquier ruta desconocida vuelve a index.html (enrutado del lado del cliente)
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+	}
+}
