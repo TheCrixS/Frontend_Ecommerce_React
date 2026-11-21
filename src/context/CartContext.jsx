@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { maxUnits } from "../utils/format";
 
 const CartContext = createContext(null);
 const CART_STORAGE_KEY = "manga_store_cart";
@@ -23,7 +24,7 @@ export function CartProvider({ children }) {
     setItems((prevItems) => {
       const existing = prevItems.find((item) => item.product.id === product.id);
       if (existing) {
-        const nextQuantity = Math.min(existing.quantity + quantity, product.stock);
+        const nextQuantity = Math.min(existing.quantity + quantity, maxUnits(product));
         return prevItems.map((item) =>
           item.product.id === product.id
             ? { ...item, product, quantity: nextQuantity }
@@ -32,7 +33,7 @@ export function CartProvider({ children }) {
       }
       return [
         ...prevItems,
-        { product, quantity: Math.min(quantity, product.stock) },
+        { product, quantity: Math.min(quantity, maxUnits(product)) },
       ];
     });
   };
@@ -46,7 +47,7 @@ export function CartProvider({ children }) {
     setItems((prevItems) =>
       prevItems.map((item) => {
         if (item.product.id !== productId) return item;
-        const clamped = Math.min(quantity, item.product.stock);
+        const clamped = Math.min(quantity, maxUnits(item.product));
         return { ...item, quantity: clamped };
       })
     );

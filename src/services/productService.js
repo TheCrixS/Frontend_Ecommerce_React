@@ -25,4 +25,17 @@ export const productService = {
     const { data } = await api.delete(`/products/${id}`);
     return data;
   },
+  uploadImage: async (id, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    // Content-Type undefined para que el navegador ponga el boundary del multipart
+    const { data } = await api.post(`/products/${id}/image`, formData, {
+      headers: { "Content-Type": undefined },
+    });
+    return data;
+  },
+  removeImage: async (id) => {
+    const { data } = await api.delete(`/products/${id}/image`);
+    return data;
+  },
 };

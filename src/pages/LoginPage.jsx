@@ -23,22 +23,32 @@ export default function LoginPage() {
       await login({ email, password });
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError(
-        err.response?.data?.detail || "Correo o contraseña incorrectos."
-      );
+      // FastAPI devuelve una lista de errores cuando falla la validación (422)
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        setError(detail.map((item) => item.msg).join(". "));
+      } else {
+        setError(detail || "Correo o contraseña incorrectos.");
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
+    <div className="auth-layout">
+      <div className="auth-art">
+        <span className="eyebrow" style={{ color: "white" }}>Bienvenido de vuelta</span>
+        <h2>Tu colección te está esperando.</h2>
+        <p>Retoma tus pedidos y sigue el estado de cada envío.</p>
+      </div>
     <div className="auth-card">
       <h1>Iniciar sesión</h1>
       <p className="auth-subtitle">
         Accede para gestionar tus compras y pedidos.
       </p>
 
-      {error && <div className="alert-error">{error}</div>}
+      {error && <div className="alert alert-error">{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -67,8 +77,8 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="btn btn-primary"
-          style={{ width: "100%", marginTop: "0.5rem" }}
+          className="btn btn-primary btn-lg btn-block"
+          style={{ marginTop: "0.5rem" }}
           disabled={submitting}
         >
           {submitting ? "Ingresando..." : "Ingresar"}
@@ -78,6 +88,7 @@ export default function LoginPage() {
       <p className="auth-footer">
         ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
       </p>
+    </div>
     </div>
   );
 }
