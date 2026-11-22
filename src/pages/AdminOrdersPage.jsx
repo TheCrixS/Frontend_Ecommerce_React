@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { orderService } from "../services/orderService";
 import AdminTabs from "../components/AdminTabs";
 import { OrderItems, OrderTimeline } from "./OrdersPage";
-import { formatCOP, formatDate, getErrorMessage, STATUS_LABELS } from "../utils/format";
+import { formatAddress, formatCOP, formatDate, getErrorMessage, STATUS_LABELS } from "../utils/format";
 
 // Debe coincidir con ALLOWED_TRANSITIONS del backend
 const NEXT_STATUSES = {
@@ -122,7 +122,10 @@ export default function AdminOrdersPage() {
             <div className="order-foot">
               <span>
                 {order.payment_reference ? `Ref. ${order.payment_reference}` : "Sin pago"}
-                {order.shipping_address && ` · ${order.shipping_address}`}
+                {order.shipping_address &&
+                  ` · ${order.recipient_name ? `${order.recipient_name}, ` : ""}${formatAddress(order)}${
+                    order.recipient_phone ? ` · Tel. ${order.recipient_phone}` : ""
+                  }`}
               </span>
               <div className="order-foot-actions">
                 {NEXT_STATUSES[order.status].map((status) => (

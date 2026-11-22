@@ -50,6 +50,13 @@ export function AuthProvider({ children }) {
     return await authService.register(userData);
   };
 
+  const updateProfile = async (profile) => {
+    const updated = await authService.updateProfile(profile);
+    localStorage.setItem("user", JSON.stringify(updated));
+    setUser(updated);
+    return updated;
+  };
+
   const logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
@@ -63,6 +70,7 @@ export function AuthProvider({ children }) {
     isAdmin: Boolean(user?.is_admin),
     login,
     register,
+    updateProfile,
     logout,
   };
 

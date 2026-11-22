@@ -1,14 +1,19 @@
 import api from "./api";
 
 export const orderService = {
-  create: async (items, shippingAddress) => {
-    // Formato esperado por OrderCreate: { items: [{ product_id, quantity }], shipping_address }
+  create: async (items, shipping = {}) => {
+    // Formato esperado por OrderCreate: { items: [{ product_id, quantity }], datos de envío }.
+    // Si no se envía dirección, el backend usa la guardada en el perfil.
     const payload = {
       items: items.map((item) => ({
         product_id: item.product.id,
         quantity: item.quantity,
       })),
-      shipping_address: shippingAddress || null,
+      recipient_name: shipping.recipient_name || null,
+      recipient_phone: shipping.recipient_phone || null,
+      shipping_address: shipping.shipping_address || null,
+      shipping_city: shipping.shipping_city || null,
+      shipping_department: shipping.shipping_department || null,
     };
     const { data } = await api.post("/orders/", payload);
     return data;

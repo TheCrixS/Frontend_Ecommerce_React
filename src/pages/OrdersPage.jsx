@@ -4,6 +4,7 @@ import { Package, Check, CreditCard, X } from "lucide-react";
 import { orderService } from "../services/orderService";
 import { CoverImage } from "../components/ProductCard";
 import {
+  formatAddress,
   formatCOP,
   formatDate,
   getErrorMessage,
@@ -157,7 +158,7 @@ export default function OrdersPage() {
                   : order.status === "pending"
                   ? "Esperando el pago"
                   : "Sin pago registrado"}
-                {order.shipping_address && ` · Envío a ${order.shipping_address}`}
+                {order.shipping_address && ` · Envío a ${formatAddress(order)}`}
               </span>
               {order.status === "pending" && (
                 <div className="order-foot-actions">

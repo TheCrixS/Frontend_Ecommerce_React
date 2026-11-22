@@ -5,6 +5,7 @@ import { orderService } from "../services/orderService";
 import { useAuth } from "../context/AuthContext";
 import { CoverImage } from "../components/ProductCard";
 import {
+  formatAddress,
   formatCOP,
   formatDate,
   getErrorMessage,
@@ -223,8 +224,22 @@ export default function CheckoutPage() {
           </div>
           {order.shipping_address && (
             <div className="summary-line">
-              <span>Envío a</span>
-              <span style={{ textAlign: "right" }}>{order.shipping_address}</span>
+              <span style={{ whiteSpace: "nowrap" }}>Envío a</span>
+              <span style={{ textAlign: "right" }}>
+                {order.recipient_name && (
+                  <>
+                    {order.recipient_name}
+                    <br />
+                  </>
+                )}
+                {formatAddress(order)}
+                {order.recipient_phone && (
+                  <>
+                    <br />
+                    Tel. {order.recipient_phone}
+                  </>
+                )}
+              </span>
             </div>
           )}
           <div className="summary-total">

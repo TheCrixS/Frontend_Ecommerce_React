@@ -1,22 +1,69 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Trash2, ShoppingBag, ArrowRight, Lock } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowRight, Lock, MapPin, Pencil } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { orderService } from "../services/orderService";
 import { CoverImage } from "../components/ProductCard";
-import { formatCOP, getErrorMessage, maxUnits } from "../utils/format";
+import AddressFields from "../components/AddressFields";
+import { formatAddress, formatCOP, getErrorMessage, maxUnits } from "../utils/format";
+
+const shippingFromProfile = (user) => ({
+  name: user?.full_name || "",
+  phone: user?.phone || "",
+  address: user?.shipping_address || "",
+  city: user?.city || "",
+  department: user?.department || "",
+});
+
+// La dirección del perfil se usa sin abrir el formulario solo si está completa;
+// si le falta algo, el formulario se abre ya llenado con lo que haya
+const hasSavedAddress = (user) =>
+  Boolean(user?.shipping_address && user?.city && user?.department && user?.phone);
 
 export default function CartPage() {
   const { items, totalItems, totalPrice, updateQuantity, removeFromCart, clearCart } =
     useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, updateProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [shippingAddress, setShippingAddress] = useState(user?.shipping_address || "");
+  const [shipping, setShipping] = useState(() => shippingFromProfile(user));
+  // Con dirección guardada se muestra un resumen; el formulario se abre con "Cambiar"
+  const [editingShipping, setEditingShipping] = useState(() => !hasSavedAddress(user));
+  const [shippingTouched, setShippingTouched] = useState(false);
+  const [saveToProfile, setSaveToProfile] = useState(() => !hasSavedAddress(user));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  // Al iniciar sesión o refrescar el perfil, vuelve a llenar la dirección si el
+  // usuario todavía no la ha tocado (ajuste durante el render, sin useEffect)
+  const [profileSeen, setProfileSeen] = useState(user);
+  if (user !== profileSeen) {
+    setProfileSeen(user);
+    if (!shippingTouched) {
+      setShipping(shippingFromProfile(user));
+      setEditingShipping(!hasSavedAddress(user));
+      setSaveToProfile(!hasSavedAddress(user));
+    }
+  }
+
+  const handleShippingChange = (name, value) => {
+    setShippingTouched(true);
+    setShipping((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const startEditingShipping = () => {
+    setShippingTouched(true);
+    setEditingShipping(true);
+  };
+
+  const useSavedAddress = () => {
+    setShipping(shippingFromProfile(user));
+    setEditingShipping(false);
+    setSaveToProfile(false);
+    setShippingTouched(false);
+  };
 
   const handleCheckout = async (e) => {
     e.preventDefault();
@@ -29,8 +76,26 @@ export default function CartPage() {
     setSubmitting(true);
 
     try {
+      const details = {
+        recipient_name: shipping.name.trim(),
+        recipient_phone: shipping.phone.trim(),
+        shipping_address: shipping.address.trim(),
+        shipping_city: shipping.city.trim(),
+        shipping_department: shipping.department,
+      };
       // La orden se crea pendiente (reserva el stock) y luego se paga en el checkout
-      const order = await orderService.create(items, shippingAddress.trim());
+      const order = await orderService.create(items, details);
+
+      if (editingShipping && saveToProfile) {
+        // El pedido ya quedó creado: si guardar en el perfil falla no se interrumpe la compra
+        await updateProfile({
+          phone: details.recipient_phone,
+          shipping_address: details.shipping_address,
+          city: details.shipping_city,
+          department: details.shipping_department,
+        }).catch(() => {});
+      }
+
       clearCart();
       navigate(`/checkout/${order.id}`);
     } catch (err) {
@@ -127,7 +192,10 @@ export default function CartPage() {
           ))}
         </div>
 
-        <form className="card-box summary" onSubmit={handleCheckout}>
+        <form
+          className={`card-box summary ${isAuthenticated && editingShipping ? "summary-static" : ""}`}
+          onSubmit={handleCheckout}
+        >
           <h2>Resumen</h2>
           <div className="summary-line">
             <span>Subtotal ({totalItems})</span>
@@ -143,16 +211,54 @@ export default function CartPage() {
           </div>
 
           {isAuthenticated && (
-            <div className="form-group" style={{ marginTop: "0.5rem", marginBottom: 0 }}>
-              <label htmlFor="shipping_address">Dirección de envío</label>
-              <input
-                id="shipping_address"
-                required
-                maxLength={255}
-                value={shippingAddress}
-                onChange={(e) => setShippingAddress(e.target.value)}
-                placeholder="Calle, número, ciudad"
-              />
+            <div className="shipping-box">
+              <div className="shipping-box-head">
+                <h3>Datos de envío</h3>
+                {editingShipping ? (
+                  hasSavedAddress(user) && (
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={useSavedAddress}>
+                      Usar la guardada
+                    </button>
+                  )
+                ) : (
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={startEditingShipping}>
+                    <Pencil size={14} />
+                    <span>Cambiar</span>
+                  </button>
+                )}
+              </div>
+
+              {editingShipping ? (
+                <>
+                  <AddressFields
+                    value={shipping}
+                    onChange={handleShippingChange}
+                    idPrefix="ship"
+                    required
+                  />
+                  <label className="checkbox-line">
+                    <input
+                      type="checkbox"
+                      checked={saveToProfile}
+                      onChange={(e) => setSaveToProfile(e.target.checked)}
+                    />
+                    <span>
+                      {hasSavedAddress(user)
+                        ? "Reemplazar la dirección guardada en mi perfil"
+                        : "Guardar esta dirección en mi perfil"}
+                    </span>
+                  </label>
+                </>
+              ) : (
+                <div className="address-card">
+                  <MapPin size={18} />
+                  <div>
+                    <strong>{shipping.name}</strong>
+                    <span>{formatAddress(user)}</span>
+                    <span>Tel. {shipping.phone}</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

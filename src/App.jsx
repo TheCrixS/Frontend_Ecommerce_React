@@ -12,6 +12,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import OrdersPage from "./pages/OrdersPage";
+import ProfilePage from "./pages/ProfilePage";
 import AdminProductsPage from "./pages/AdminProductsPage";
 import AdminOrdersPage from "./pages/AdminOrdersPage";
 
@@ -44,6 +45,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <OrdersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
                   </ProtectedRoute>
                 }
               />

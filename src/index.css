@@ -1948,6 +1948,175 @@ textarea {
   }
 }
 
+/* ==========================================================================
+   Perfil y datos de envío
+   ========================================================================== */
+.nav-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.nav-profile .avatar {
+  transition: box-shadow var(--duration-fast);
+}
+
+.nav-profile:hover .avatar,
+.nav-profile.active .avatar,
+.nav-profile:focus-visible .avatar {
+  box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-action);
+}
+
+.nav-profile-label {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .nav-profile-label {
+    display: inline;
+  }
+}
+
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+  font-size: var(--text-2xl);
+  flex-shrink: 0;
+}
+
+.profile-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.profile-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.profile-intro {
+  margin: calc(var(--space-2) * -1) 0 var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.profile-layout .alert {
+  margin-bottom: var(--space-4);
+}
+
+.address-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--space-4);
+}
+
+.address-fields .form-group-wide {
+  grid-column: 1 / -1;
+}
+
+/* En la columna angosta del carrito los campos van uno debajo del otro */
+.summary .address-fields {
+  grid-template-columns: 1fr;
+}
+
+.form-group input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.address-card {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.address-card > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-action);
+}
+
+.address-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.address-card strong {
+  color: var(--color-text);
+}
+
+.shipping-box {
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.shipping-box-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.shipping-box-head h3 {
+  font-size: var(--text-md);
+}
+
+.checkbox-line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.checkbox-line input {
+  margin-top: 3px;
+  accent-color: var(--color-action);
+}
+
+.summary.summary-static {
+  position: static;
+}
+
+@media (max-width: 900px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .address-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .avatar-lg {
+    width: 48px;
+    height: 48px;
+    font-size: var(--text-xl);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

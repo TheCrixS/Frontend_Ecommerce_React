@@ -68,3 +68,12 @@ export const PAYMENT_LABELS = {
   pse: "PSE",
   nequi: "Nequi",
 };
+
+// "Cra 7 # 45-10, Bogotá, Bogotá D.C." a partir de una orden o de un perfil
+export function formatAddress({ shipping_address, shipping_city, shipping_department, city, department }) {
+  const cityName = shipping_city ?? city;
+  const departmentName = shipping_department ?? department;
+  return [shipping_address, cityName, departmentName !== cityName ? departmentName : null]
+    .filter(Boolean)
+    .join(", ");
+}

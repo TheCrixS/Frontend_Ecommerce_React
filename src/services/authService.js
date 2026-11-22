@@ -13,4 +13,15 @@ export const authService = {
     const { data } = await api.get("/users/me");
     return data;
   },
+  updateProfile: async (profile) => {
+    // Solo se envían los campos a cambiar; un texto vacío borra el dato
+    const { data } = await api.put("/users/me", profile);
+    return data;
+  },
+  changePassword: async (currentPassword, newPassword) => {
+    await api.put("/users/me/password", {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+  },
 };

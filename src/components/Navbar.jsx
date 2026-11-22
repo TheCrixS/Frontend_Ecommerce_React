@@ -77,9 +77,16 @@ export default function Navbar() {
 
           {isAuthenticated ? (
             <div className="nav-user">
-              <span className="avatar" title={user.full_name}>
-                {user.full_name.trim().charAt(0).toUpperCase()}
-              </span>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) => `nav-profile ${isActive ? "active" : ""}`}
+                title="Mi perfil"
+              >
+                <span className="avatar" aria-hidden="true">
+                  {user.full_name.trim().charAt(0).toUpperCase()}
+                </span>
+                <span className="nav-profile-label">Mi perfil</span>
+              </NavLink>
               <button
                 type="button"
                 onClick={handleLogout}
