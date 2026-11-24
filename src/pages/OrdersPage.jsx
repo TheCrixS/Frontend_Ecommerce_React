@@ -13,6 +13,9 @@ import {
   STATUS_LABELS,
 } from "../utils/format";
 
+// Debe coincidir con CUSTOMER_CANCELLABLE del backend: el pedido aún no se ha enviado
+const CANCELLABLE_STATUSES = ["pending", "paid"];
+
 const STEP_LABELS = {
   pending: "Pedido creado",
   paid: "Pagado",
@@ -91,7 +94,8 @@ export default function OrdersPage() {
   }, []);
 
   const handleCancel = async (order) => {
-    if (!window.confirm(`¿Cancelar el pedido #${order.id}? Los tomos vuelven al inventario.`)) {
+    const refundNote = order.status === "paid" ? " Se reembolsará el pago." : "";
+    if (!window.confirm(`¿Cancelar el pedido #${order.id}?${refundNote}`)) {
       return;
     }
     setBusyId(order.id);
@@ -160,7 +164,7 @@ export default function OrdersPage() {
                   : "Sin pago registrado"}
                 {order.shipping_address && ` · Envío a ${formatAddress(order)}`}
               </span>
-              {order.status === "pending" && (
+              {CANCELLABLE_STATUSES.includes(order.status) && (
                 <div className="order-foot-actions">
                   <button
                     type="button"
@@ -169,12 +173,14 @@ export default function OrdersPage() {
                     onClick={() => handleCancel(order)}
                   >
                     <X size={15} />
-                    <span>Cancelar</span>
+                    <span>Cancelar pedido</span>
                   </button>
-                  <Link to={`/checkout/${order.id}`} className="btn btn-primary btn-sm">
-                    <CreditCard size={15} />
-                    <span>Pagar ahora</span>
-                  </Link>
+                  {order.status === "pending" && (
+                    <Link to={`/checkout/${order.id}`} className="btn btn-primary btn-sm">
+                      <CreditCard size={15} />
+                      <span>Pagar ahora</span>
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
